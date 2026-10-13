@@ -25,13 +25,16 @@ from mathutils.bvhtree import BVHTree
 # ------------------------------------------------------------------ arguments
 argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 ap = argparse.ArgumentParser()
-ap.add_argument('--preset', default='random')
+ap.add_argument('--preset', default='random') # sphaerica_f, sphaerica_m, pluma_m, random
 ap.add_argument('--seed', type=int, default=0)
 ap.add_argument('--hair', type=float, default=1.0, help='hair density multiplier (0 = no hair)')
 ap.add_argument('--bake-res', type=int, default=1024, help='resolution of the colour map used by the hair')
 ap.add_argument('--out', default='mallinella.blend')
 args = ap.parse_args(argv)
 R = random.Random(args.seed)
+# ------------------------------------------------------------------ random jitter
+# This function applies a small random jitter to a value, within a specified relative range 
+# in order to introduce variability in the generated spider model. The 'rel' parameter defines the maximum relative change allowed.
 def jit(v, rel=0.06):
     return v * (1 + R.uniform(-rel, rel))
 

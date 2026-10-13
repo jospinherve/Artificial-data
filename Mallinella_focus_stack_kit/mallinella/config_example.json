@@ -1,9 +1,9 @@
 {
   "output_dir": "renders",
   "resolution": [2048, 1536],
-  "samples": 128,
+  "samples": 256,
   "denoise": true,
-  "device": "CPU",
+  "device": "OPTIX",
 
   "optics": {
     "mode": "lens",
@@ -17,16 +17,16 @@
   },
 
   "stack": {
-    "mode": "rail",
+    "mode": "focus",
     "step_mm": null,
     "overlap": 0.7,
     "margin_mm": 0.2,
-    "max_slices": 150
+    "max_slices": 12
   },
 
   "background": { "substrate": "paper", "substrate_color": [0.55, 0.52, 0.47], "color": [0.75, 0.75, 0.75] },
   "lighting": { "dome_strength": 0.6, "softbox_power": 1.0, "jitter": 0.2 },
-  "color": { "view_transform": "Standard", "exposure": 0.0 },
+  "color": { "view_transform": "AgX", "exposure": 0.0 },
   "outputs": { "bit_depth": 8, "all_in_focus": true, "normals": true },
 
   "views": [

@@ -1,0 +1,31 @@
+# Données générées (rendus, focus stacks, profondeurs)
+renders/
+sample_output/
+output/
+outputs/
+*.exr
+*.npy
+*.npz
+*.h5
+*.hdf5
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+
+# Sauvegardes automatiques de Blender
+*.blend1
+*.blend2
+
+# Environnement Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Éditeur / système
+.vscode/
+.idea/
+.DS_Store
