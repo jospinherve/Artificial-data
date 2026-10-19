@@ -1,5 +1,5 @@
 """
-Synthetic macro focus-stacking + ground-truth depth for a Mallinella specimen (Blender 4.2+ / 5.x, Cycles).
+Synthetic macro focus-stacking + ground-truth depth for a spider specimen (Blender 4.2+ / 5.x, Cycles).
 
   blender -b specimens/mallinella_sphaerica_m_001.blend -P render_focus_stack.py -- --config config.json
   (optional: --out DIR  --views dorsal,lateral_L  --quick)
@@ -54,9 +54,9 @@ def cfg(path, default=None):
     return d
 
 scene = bpy.context.scene
-spec = [o for o in scene.objects if o.get('mallinella')]
+spec = [o for o in scene.objects if o.get('spider_specimen') or o.get('mallinella')]
 if not spec:
-    raise SystemExit('No object with the "mallinella" custom property in this file')
+    raise SystemExit('No object with the "spider_specimen" custom property in this file')
 spec = spec[0]
 spec.pass_index = 1
 SPEC_NAME = spec.name

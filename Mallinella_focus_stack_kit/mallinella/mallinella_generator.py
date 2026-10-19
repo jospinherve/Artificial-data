@@ -1,5 +1,5 @@
 """
-Mallinella (Zodariidae) procedural specimen generator for Blender (4.2+ / 5.x).
+Procedural spider specimen generator for Blender (4.2+ / 5.x).
 
 Builds a real-scale specimen (1 Blender unit = 1 mm, scene unit scale 0.001):
   * one connected all-quad mesh (prosoma + abdomen + 8 legs + palps + chelicerae) + 8 eyes,
@@ -16,7 +16,8 @@ stripes, pale spinnerets, long legs with formula 4123, yellowish coxae, darker f
 Usage
   blender -b -P mallinella_generator.py -- --preset sphaerica_m --seed 3 --out specimens/m3.blend
   blender -b -P mallinella_generator.py -- --preset random --seed 12 --hair 1.0 --out x.blend
-Presets: sphaerica_f, sphaerica_m, pluma_m, random
+Presets: sphaerica_f, sphaerica_m, pluma_m, ctenus_generic,
+macroctenus_generic, amicactenus_generic, random
 """
 import bpy, bmesh, math, sys, json, argparse, random, os
 from mathutils import Vector, Matrix
@@ -25,7 +26,7 @@ from mathutils.bvhtree import BVHTree
 # ------------------------------------------------------------------ arguments
 argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
 ap = argparse.ArgumentParser()
-ap.add_argument('--preset', default='random') # sphaerica_f, sphaerica_m, pluma_m, random
+ap.add_argument('--preset', default='random')
 ap.add_argument('--seed', type=int, default=0)
 ap.add_argument('--hair', type=float, default=1.0, help='hair density multiplier (0 = no hair)')
 ap.add_argument('--bake-res', type=int, default=1024, help='resolution of the colour map used by the hair')
@@ -61,9 +62,35 @@ PRESETS = {
                     femur_col=(0.12, 0.072, 0.034), coxa_col=(0.30, 0.21, 0.10),
                     abd_col=(0.008, 0.007, 0.007), patch_col=(0.60, 0.58, 0.52),
                     scutum_col=(0.03, 0.015, 0.010), hair=1.6, bands=0.0),
+    # Generic Ctenidae morphotypes. These are synthetic genus-level profiles,
+    # not species-specific reconstructions.
+    'ctenus_generic': dict(family='Ctenidae', genus='Ctenus', sex='F',
+                           Lp=5.1, Wp=3.7, La=6.4, Wa=4.1, Ha=3.1,
+                           legs=[14.5, 16.0, 17.5, 18.5], scutum=0.0,
+                           carapace=(0.045, 0.025, 0.012), legs_col=(0.12, 0.075, 0.035),
+                           femur_col=(0.055, 0.030, 0.016), coxa_col=(0.22, 0.14, 0.06),
+                           abd_col=(0.018, 0.014, 0.012), patch_col=(0.45, 0.40, 0.30),
+                           scutum_col=(0.02, 0.012, 0.008), hair=1.25, bands=0.25),
+    'macroctenus_generic': dict(family='Ctenidae', genus='Macroctenus', sex='F',
+                                Lp=7.0, Wp=5.0, La=8.5, Wa=5.8, Ha=4.2,
+                                legs=[20.0, 22.0, 24.0, 25.0], scutum=0.0,
+                                carapace=(0.035, 0.020, 0.012), legs_col=(0.10, 0.060, 0.030),
+                                femur_col=(0.045, 0.025, 0.014), coxa_col=(0.18, 0.11, 0.05),
+                                abd_col=(0.012, 0.011, 0.010), patch_col=(0.52, 0.48, 0.38),
+                                scutum_col=(0.02, 0.012, 0.008), hair=1.0, bands=0.15),
+    'amicactenus_generic': dict(family='Ctenidae', genus='Amicactenus', sex='M',
+                                Lp=4.4, Wp=3.2, La=5.0, Wa=3.5, Ha=2.7,
+                                legs=[13.0, 14.5, 15.5, 16.5], scutum=0.35,
+                                carapace=(0.028, 0.016, 0.010), legs_col=(0.16, 0.09, 0.040),
+                                femur_col=(0.070, 0.038, 0.018), coxa_col=(0.25, 0.16, 0.07),
+                                abd_col=(0.014, 0.012, 0.011), patch_col=(0.58, 0.53, 0.42),
+                                scutum_col=(0.08, 0.025, 0.012), hair=1.4, bands=0.35),
 }
+for key in ('sphaerica_f', 'sphaerica_m', 'pluma_m'):
+    PRESETS[key].setdefault('family', 'Zodariidae')
+    PRESETS[key].setdefault('genus', 'Mallinella')
 if args.preset == 'random':
-    base = dict(R.choice(list(PRESETS.values())))
+    base = dict(R.choice([PRESETS[name] for name in ('sphaerica_f', 'sphaerica_m', 'pluma_m')]))
     base['sex'] = R.choice('MF')
     s = R.uniform(0.85, 1.1)
     for k in ('Lp', 'Wp', 'La', 'Wa', 'Ha'):
@@ -444,14 +471,18 @@ for a, b in SEAMS:
         e = bm.edges.get((a, b))
         if e: e.seam = True
 for f in bm.faces: f.smooth = True
-name = f"Mallinella_{args.preset}_{args.seed:03d}"
+name = f"{P['genus']}_{args.preset}_{args.seed:03d}"
 me = bpy.data.meshes.new(name); bm.to_mesh(me)
 ob = bpy.data.objects.new(name, me)
 coll = bpy.data.collections.new('Specimen'); bpy.context.scene.collection.children.link(coll)
 coll.objects.link(ob)
 for n_ in VG: ob.vertex_groups.new(name=n_)
 ob.pass_index = 1
-ob['mallinella'] = 1
+ob['spider_specimen'] = 1
+ob['mallinella'] = int(P.get('genus') == 'Mallinella')
+ob['family'] = P['family']
+ob['genus'] = P['genus']
+ob['morphotype'] = P['preset']
 ob['params'] = json.dumps(P)
 sc = bpy.context.scene
 sc.unit_settings.system = 'METRIC'; sc.unit_settings.scale_length = 0.001; sc.unit_settings.length_unit = 'MILLIMETERS'

@@ -13,6 +13,7 @@ Testé avec Blender 5.2 (module `bpy`). Le code n'utilise que des API présentes
 | `render_focus_stack.py` | Rendu des focus stacks + vérité terrain, piloté par un JSON |
 | `config_example.json` | Optique, pile, fond, éclairage et **liste des orientations** à modifier |
 | `run_all.sh` | Rend tous les spécimens (et peut en générer de nouveaux) |
+| `generate_all_families.sh` | Génère et rend tous les morphotypes Zodariidae et Ctenidae |
 | `load_dataset.py` | Chargeur numpy/Pillow (pile, profondeurs de mise au point, profondeur, masque) |
 | `sample_output/` | Exemple de sortie (1 vue, résolution réduite) |
 | `tests/aperture_test.py` | Test qui valide la conversion de l'ouverture dans Cycles |
@@ -28,10 +29,29 @@ blender -b specimens/mallinella_pluma_m_003.blend -P render_focus_stack.py -- --
 
 # 2. Générer de nouveaux spécimens
 blender -b -P mallinella_generator.py -- --preset random --seed 42 --out specimens/mallinella_random_042.blend
-#   presets : sphaerica_f, sphaerica_m, pluma_m, random ; --hair 0 = sans setae ; --hair 1.5 = plus velu
+#   presets : sphaerica_f, sphaerica_m, pluma_m, ctenus_generic,
+macroctenus_generic, amicactenus_generic, random
+; --hair 0 = sans setae ; --hair 1.5 = plus velu
+
+Les trois presets `*_generic` sont des morphotypes synthétiques génériques de Ctenidae
+pour les genres Ctenus, Macroctenus et Amicactenus. Ils ne représentent pas une espèce
+particulière. Les presets Mallinella historiques restent disponibles.
 
 # 3. Tout rendre (en générant d'abord 20 nouveaux individus)
 N_NEW=20 ./run_all.sh config_example.json
+```
+
+Pour générer et rendre tous les morphotypes déclarés (Mallinella/Zodariidae et
+Ctenidae) avec toutes les vues de la configuration :
+
+```bash
+./generate_all_families.sh config_example.json
+```
+
+Pour valider rapidement la chaîne avec une résolution et un nombre de samples réduits :
+
+```bash
+./generate_all_families.sh config_example.json --quick
 ```
 
 Sur GPU, mettez `"device": "OPTIX"` (ou `CUDA`, `HIP`, `METAL`) dans la config.
